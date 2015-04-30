@@ -2,7 +2,23 @@ package dbcore
 
 // Core is the primary file store
 // for managing data I/O
-type Core struct{}
+type Core struct {
+	Tables []*Table
+}
+
+type Table struct {
+	Columns []*Column
+	Rows    []*Row
+}
+
+type Row struct {
+	Data []interface{}
+}
+
+type Column struct {
+	Name *string
+	Type *string
+}
 
 const dataDir = "./data"
 
@@ -14,5 +30,6 @@ func NewStore() (c *Core, err error) {
 }
 
 func (c *Core) initialize() (err error) {
+	c.Tables = []*Table{}
 	return
 }
