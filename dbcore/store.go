@@ -1,14 +1,21 @@
 package dbcore
 
-import . "github.com/mondok/gonzodb/util"
+import (
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/mondok/gonzodb/util"
+)
 
 // Core is the primary file store
 // for managing data I/O
 type Core struct {
-	Tables []*Table
+	Schemas    []*Shema
+	fileHandle io.Writer
 }
 
-type Table struct {
+type Shema struct {
 	Name    string
 	Columns []*Column
 	Rows    []*Row
@@ -24,6 +31,7 @@ type Column struct {
 }
 
 const dataDir = "./data"
+const dataFile = "db.gnz"
 
 // NewStore Creates a new DB core object
 func NewStore() (c *Core, err error) {
@@ -33,31 +41,34 @@ func NewStore() (c *Core, err error) {
 }
 
 func (c *Core) init() (err error) {
-	// TODO: load from disk
-	c.Tables = []*Table{}
+	c.Schemas = []*Shema{}
 	return
 }
 
 func (c *Core) loadTables(err error) {
+	fname := fmt.Sprintf("%s/%s", dataDir, dataFile)
+	if !util.FileExists(fname) {
+		c.fileHandle, _ = os.Create(fname)
+	}
 	return
 }
 
 func (c *Core) initSystemTable() (err error) {
 	sysTable := c.table("system")
 	if sysTable != nil {
-		// create sys table
+		// create sys schema
 	} else {
-		// load sys table
+		// load sys schema
 	}
 	return
 }
 
-func (c *Core) table(name string) (table *Table) {
-	t, found, _ := From(c.Tables).Where(func(s T) (bool, error) {
-		return s.(*Table).Name == name, nil
+func (c *Core) table(name string) (table *Shema) {
+	t, found, _ := util.From(c.Schemas).Where(func(s util.T) (bool, error) {
+		return s.(*Shema).Name == name, nil
 	}).First()
 	if found {
-		table = t.(*Table)
+		table = t.(*Shema)
 	}
 	return
 }
